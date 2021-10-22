@@ -1,0 +1,9 @@
+
+{% extends "layout.html" %}
+{% block content %}
+{% for airport in airports %}
+    <h1> {{ airport.iata_id}}</h1>
+    <p>  City: {{airport.city}} </p>
+{% endfor %}
+{% endblock content %}
+
