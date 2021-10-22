@@ -20,7 +20,8 @@ class Airport(Base):
     incoming = relationship("Route", lazy='subquery', primaryjoin="Airport.iata_id == Route.destination_id")
     def __repr__(self) -> str:
         return f"Airport('{self.iata_id}', '{self.city}', '{self.outgoing}', '{self.incoming}')"
-
+    def __eq__(self, obj):
+        return obj.iata_id == self.iata_id
 
 class Route(Base):
     __tablename__ = 'route'
@@ -31,7 +32,9 @@ class Route(Base):
     origin_id =  Column(String(3) , ForeignKey("airport.iata_id"))
     def __repr__(self) -> str:
         return f"Route('{self.id}', '{self.origin_id}', '{self.destination_id}')"
-
+    def __eq__(self, obj):
+        return obj.id == self.id or (obj.origin_id == self.origin_id and obj.destination_id
+        == self.destination_id)
 
 
 # def new_alchemy_encoder():
