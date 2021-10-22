@@ -92,7 +92,6 @@ class Airline:
 ############ POST ############
 
 
-        return jsonify({'airports':AIRPORT_SCHEMA_MANY.dump(airports)})
     def create_airport(self, airport):
 
         logging.info("Create Airport")
@@ -133,7 +132,7 @@ class Airline:
     def update_airport(self, airport):
         logging.info("Update airport")
         logging.info(airport)
-        
+
         session = Session()
         airport_to_update = session.query(Airport).filter_by(iata_id=airport['iata_id']).first()
         airport_to_update.city = airport['city']

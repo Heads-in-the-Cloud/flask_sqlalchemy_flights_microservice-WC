@@ -30,6 +30,12 @@ def findAirplaneType(id):
     return AIRPLANE_SERVICE.find_airplane_type(id)
 
 
+@app.route('/airlines/read/airplanes/type=<id>', methods=['GET'])
+def readAirplaneByType(id):
+
+    return AIRPLANE_SERVICE.read_airplane_by_type(id)
+
+
 ################### POST ###################
 
 
@@ -37,6 +43,12 @@ def findAirplaneType(id):
 def addAirplane():
 
     return AIRPLANE_SERVICE.add_airplane(request.json)
+
+
+@app.route('/airlines/add/airplane_type', methods=['POST'])
+def addAirplaneType():
+
+    return AIRPLANE_SERVICE.add_airplane_type(request.json)
 
 
 ################### PUT ###################
@@ -47,6 +59,11 @@ def updateAirplane():
 
     return AIRPLANE_SERVICE.update_airplane(request.json)
 
+
+@app.route('/airlines/update/airplane_type', methods=['PUT'])
+def updateAirplaneType():
+
+    return AIRPLANE_SERVICE.update_airplane_type(request.json)
 
 ################### DELETE ###################
 

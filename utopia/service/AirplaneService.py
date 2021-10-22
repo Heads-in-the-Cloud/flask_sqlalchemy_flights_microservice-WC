@@ -67,6 +67,19 @@ class AirplaneService:
         
         return airplane_type
 
+    def read_airplane_by_type(self, type_id):
+        
+        logging.info('reading airplanes of type %s ' %id)
+
+        session = Session()
+
+        airplanes = session.query(Airplane).filter_by(type_id=type_id)
+
+        airplanes = AIRPLANE_SCHEMA_MANY.dump(airplanes)
+        session.close()
+
+        return jsonify({'airplanes' : airplanes})
+
 
 ############ POST ############
 
@@ -85,6 +98,23 @@ class AirplaneService:
         session.close()
         
         return airplane
+
+
+    def add_airplane_type(self, airplane_type):
+
+        logging.info('adding airplane type')
+
+        session = Session()
+        airplane_type = AirplaneType(id = None, max_capacity=airplane_type['max_capacity'])
+        session.add(airplane_type)
+
+        session.commit()
+
+        airplane_type = AIRPLANE_TYPE_SCHEMA.dump(airplane_type)
+        session.close()
+        
+        return airplane_type
+
 
 ############ PUT ############
 
@@ -113,17 +143,18 @@ class AirplaneService:
 
             session = Session()
 
-            airplane_type = session.query(AirplaneType).filter_by(id = airplane_type['id']).first()
+            airplane_type_to_update = session.query(AirplaneType).filter_by(id = airplane_type['id']).first()
 
-            airplane_type.max_capacity = airplane_type['max_capacity']
+
+            airplane_type_to_update.max_capacity = airplane_type['max_capacity']
 
             session.commit()
 
-            airplane_type = AIRPLANE_TYPE_SCHEMA.dump(airplane_type)
+            airplane_type_to_update = AIRPLANE_TYPE_SCHEMA.dump(airplane_type_to_update)
 
             session.close()
 
-            return airplane_type
+            return airplane_type_to_update
 
 
 ############ DELETE ############
@@ -146,7 +177,10 @@ class AirplaneService:
 
         session = Session()
 
-        session.query(AirplaneType).filter_by(id=id).delete()
+        airplane = session.query(AirplaneType).filter_by(id=id).first()
+        session.delete(airplane)
+
+
         session.commit()
         session.close()
         
