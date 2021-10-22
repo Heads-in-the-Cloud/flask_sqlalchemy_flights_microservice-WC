@@ -13,5 +13,5 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:root@localhost/utopia'
 engine = create_engine('mysql://root:root@localhost/utopia', echo=True)
 Session = sessionmaker(bind=engine)
 
-from utopia import routes
+from utopia import AirportController, AirplaneController
 

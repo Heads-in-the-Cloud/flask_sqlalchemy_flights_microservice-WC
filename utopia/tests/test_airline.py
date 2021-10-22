@@ -49,7 +49,7 @@ class TestAirline(unittest.TestCase):
         print('test read airport')
 
         with app.app_context():
-            airports = AIRLINE_SERVICE.read_airport()
+            airports = AIRLINE_SERVICE.read_airports()
             self.assertEqual(list(map(lambda x: x['iata_id'], airports.json['airports'])).count(IATA_ID_1), 1)
 
     def test_update_airport(self):
@@ -68,7 +68,7 @@ class TestAirline(unittest.TestCase):
         print("test read route")
 
         with app.app_context():
-            routes = AIRLINE_SERVICE.read_route().json['routes']
+            routes = AIRLINE_SERVICE.read_routes().json['routes']
             
             routes = list(filter(lambda x: x['origin_id'] == IATA_ID_1, routes))
             self.assertEqual(len(routes), 1)
@@ -79,14 +79,14 @@ class TestAirline(unittest.TestCase):
 
         with app.app_context():
 
-            routes = AIRLINE_SERVICE.read_route().json['routes']
+            routes = AIRLINE_SERVICE.read_routes().json['routes']
             route = list(filter(lambda x : x['origin_id'] == IATA_ID_1, routes))[0]
             route_id = route['id']
             route = {'id':route_id, 'origin_id':IATA_ID_2, 'destination_id': IATA_ID_1}
         
             AIRLINE_SERVICE.update_route(route)
 
-            routes = AIRLINE_SERVICE.read_route().json['routes']
+            routes = AIRLINE_SERVICE.read_routes().json['routes']
 
             routes = list(filter(lambda x: x['origin_id'] == IATA_ID_2, routes))
             self.assertEqual(len(routes), 1)
@@ -98,7 +98,7 @@ class TestAirline(unittest.TestCase):
 
         with app.app_context():
 
-            airports = AIRLINE_SERVICE.read_airport().json['airports']
+            airports = AIRLINE_SERVICE.read_airports().json['airports']
             random_iata_id = airports[random.randint(0, len(airports))]['iata_id']
 
             print("incoming routes to airport %s" %random_iata_id)
@@ -113,7 +113,7 @@ class TestAirline(unittest.TestCase):
 
             with app.app_context():
 
-                airports = AIRLINE_SERVICE.read_airport().json['airports']
+                airports = AIRLINE_SERVICE.read_airports().json['airports']
                 random_iata_id = airports[random.randint(0, len(airports))]['iata_id']
                 print("outgoing routes from airport %s" %random_iata_id)
 

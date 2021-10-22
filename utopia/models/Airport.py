@@ -1,14 +1,20 @@
+from flask import Flask, app
 from sqlalchemy.sql.expression import false
 from sqlalchemy.sql.selectable import subquery
 from sqlalchemy.ext.declarative import DeclarativeMeta
-import json
 from sqlalchemy import Column, Integer, String, Sequence, ForeignKey, ForeignKeyConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from flask_marshmallow import Marshmallow
+from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
+from marshmallow import Schema, fields
+import json
 
 
 
 Base = declarative_base()
+ma = Marshmallow(app)
+
 
 class Airport(Base):
     __tablename__ = 'airport'
@@ -35,6 +41,33 @@ class Route(Base):
     def __eq__(self, obj):
         return obj.id == self.id or (obj.origin_id == self.origin_id and obj.destination_id
         == self.destination_id)
+
+
+
+
+class RouteSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Route
+        ordered = True
+    id = auto_field()
+    origin_id = auto_field()
+    destination_id = auto_field()
+
+class AirportSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Airport
+        ordered = True
+    iata_id = auto_field()
+    city = auto_field()
+    # incoming = fields.List(fields.Nested(RouteSchema))
+    # outgoing= fields.List(fields.Nested(RouteSchema))
+
+AIRPORT_SCHEMA = AirportSchema()
+ROUTE_SCHEMA = RouteSchema()
+
+
+AIRPORT_SCHEMA_MANY = AirportSchema(many=True)
+ROUTE_SCHEMA_MANY = RouteSchema(many=True)
 
 
 # def new_alchemy_encoder():
