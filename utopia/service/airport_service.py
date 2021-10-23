@@ -2,7 +2,7 @@ from flask import Flask, app, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 
-from utopia.models.Airport import AIRPORT_SCHEMA_MANY, ROUTE_SCHEMA, ROUTE_SCHEMA_MANY, Airport, Route, AIRPORT_SCHEMA
+from utopia.models.models import AIRPORT_SCHEMA_MANY, ROUTE_SCHEMA, ROUTE_SCHEMA_MANY, Airport, Route, AIRPORT_SCHEMA
 from utopia import Session
 
 import logging, json, traceback
@@ -10,7 +10,7 @@ import logging, json, traceback
 logging.basicConfig(level=logging.INFO)
 
 
-class Airline:
+class AirportService:
 
     def __init__(self):
 	    self = self

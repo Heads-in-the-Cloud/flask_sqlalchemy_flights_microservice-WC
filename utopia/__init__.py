@@ -9,9 +9,9 @@ app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:root@localhost/utopia'
 
-# db = SQLAlchemy(app)
+db = SQLAlchemy(app)
 engine = create_engine('mysql://root:root@localhost/utopia', echo=True)
 Session = sessionmaker(bind=engine)
 
-from utopia import AirportController, AirplaneController
+from utopia import airport_controller, airplane_controller, flight_controller
 

@@ -1,6 +1,6 @@
 from flask import Flask, json, request
 from utopia import app
-from utopia.service.AirplaneService import AirplaneService
+from utopia.service.airplane_service import AirplaneService
 import logging
 
 AIRPLANE_SERVICE = AirplaneService()

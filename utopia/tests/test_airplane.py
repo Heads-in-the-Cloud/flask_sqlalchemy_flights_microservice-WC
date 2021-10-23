@@ -4,9 +4,8 @@ from sqlalchemy.sql.expression import update
 from sqlalchemy.sql.functions import count
 from utopia import app
 import random
-from utopia.AirportController import AIRLINE_SERVICE
 
-from utopia.service.AirplaneService import AirplaneService
+from utopia.service.airplane_service import AirplaneService
 
 
 AIRPLANE_SERVICE = AirplaneService()

@@ -1,9 +1,9 @@
 from flask import Flask, json, request
 from utopia import app
-from utopia.service.Airline import Airline
+from utopia.service.airport_service import AirportService
 import logging
 
-AIRLINE_SERVICE = Airline()
+AIRLINE_SERVICE = AirportService()
 
 
 ################### GET ###################

@@ -2,7 +2,7 @@ from flask import Flask, app, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 
-from utopia.models.Airplane import Airplane, AirplaneType, AIRPLANE_SCHEMA, AIRPLANE_TYPE_SCHEMA, AIRPLANE_SCHEMA_MANY, AIRPLANE_TYPE_SCHEMA_MANY
+from utopia.models.models import Airplane, AirplaneType, AIRPLANE_SCHEMA, AIRPLANE_TYPE_SCHEMA, AIRPLANE_SCHEMA_MANY, AIRPLANE_TYPE_SCHEMA_MANY
 from utopia import Session
 
 import logging, json, traceback
