@@ -1,7 +1,6 @@
 import unittest
 from flask import Flask, json, jsonify
-from sqlalchemy.sql.expression import update
-from sqlalchemy.sql.functions import count
+
 from utopia import app
 import random
 
@@ -33,8 +32,6 @@ def teardown_airplane(id):
     AIRPLANE_SERVICE.delete_airplane(id)
 
 class TestAirline(unittest.TestCase):
-
-    
     
     def test_max_capacity(self):
 

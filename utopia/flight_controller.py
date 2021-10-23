@@ -40,3 +40,26 @@ def readFlightByRoute(id):
 def addFlight():
     
     return FLIGHT_SERVICE.add_flight(request.json)
+
+
+@app.route('/airlines/add/flights', methods=['POST'])
+def addFlights():
+    
+    return FLIGHT_SERVICE.add_flights(request.json)
+
+################### PUT ###################
+
+
+@app.route('/airlines/update/flight', methods=['PUT'])
+def updateFlight():
+    
+    return FLIGHT_SERVICE.update_flight(request.json)
+
+
+
+################### DELETE ###################
+
+@app.route('/airlines/delete/flight/id=<id>', methods=['DELETE'])
+def deleteFlight(id):
+    
+    return FLIGHT_SERVICE.delete_flight(id)

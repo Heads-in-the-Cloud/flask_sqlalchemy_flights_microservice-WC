@@ -6,10 +6,11 @@ import logging
 AIRLINE_SERVICE = AirportService()
 
 
+
 ################### GET ###################
 
 
-@app.route('/airlines/read/airports')
+@app.route('/airlines/read/airports', methods=['GET'])
 def readAirports():
 
     return AIRLINE_SERVICE.read_airports()
