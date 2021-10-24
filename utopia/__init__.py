@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+
 app = Flask(__name__)
 
 
@@ -13,5 +14,4 @@ db = SQLAlchemy(app)
 engine = create_engine('mysql://root:root@localhost/utopia', echo=True)
 Session = sessionmaker(bind=engine)
 
-from utopia import airport_controller , airplane_controller, flight_controller
-
+from utopia import airport_controller , airplane_controller, flight_controller, error_handler

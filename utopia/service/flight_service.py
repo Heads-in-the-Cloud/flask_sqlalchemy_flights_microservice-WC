@@ -108,8 +108,21 @@ class FlightService:
 
         session = Session()
 
-        departure_time = datetime.datetime.strptime(flight['departure_time'].replace('T', ' '), '%Y-%m-%d %H:%M:%S')
-        check_departure_time(departure_time, flight['airplane_id'])
+        try:
+            departure_time = datetime.datetime.strptime(flight['departure_time'].replace('T', ' '), '%Y-%m-%d %H:%M:%S')
+        except:
+            raise ValueError()
+        
+        # check_departure_time(departure_time, flight['airplane_id'])
+
+        print("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
+        print("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
+        print("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
+        print("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
+        print("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
+        print("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
+        print("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
+
 
         flight_to_add = Flight(id=None if 'id' not in flight else flight['id'],
         airplane_id=flight['airplane_id'], 
@@ -118,6 +131,8 @@ class FlightService:
         reserved_seats=flight['reserved_seats'], 
         seat_price="{:.2f}".format(flight['seat_price']))
 
+
+        
         session.add(flight_to_add)
         session.commit()
         flight_to_add = FLIGHT_SCHEMA.dump(flight_to_add)
@@ -128,24 +143,25 @@ class FlightService:
     def add_flights(self, flights):
 
         logging.info('adding flight')
-
-        flight_ids = generate_f_ids(len(flights))
-        i = 0
         session = Session()
 
         flights_to_add = []
 
-        for flight in flights:
-  
-            flight_to_add = Flight(id=flight_ids[i],
+        for flight, flight_id in zip(flights, generate_f_ids(len(flights))):
+            
+            try:
+                departure_time = datetime.datetime.strptime(flight['departure_time'].replace('T', ' '), '%Y-%m-%d %H:%M:%S')
+            except:
+                raise ValueError()
+
+            flight_to_add = Flight(id=flight_id,
             airplane_id=flight['airplane_id'], 
             route_id = flight['route_id'],
-            departure_time=datetime.datetime.strptime(flight['departure_time'].replace('T', ' '), '%Y-%m-%d %H:%M:%S'), 
+            departure_time=departure_time, 
             reserved_seats=flight['reserved_seats'], 
             seat_price="{:.2f}".format(flight['seat_price']))
 
             flights_to_add.append(flight_to_add)
-            i+=1
             
         session.bulk_save_objects(flights_to_add)
 
@@ -154,10 +170,10 @@ class FlightService:
         
         flights_to_add = FLIGHT_SCHEMA_MANY.dump(flights_to_add)
         
+        #reattach airplane id and route id to return value
         for i in range(len(flights)):
             flights_to_add[i]['airplane_id'] = flights[i]['airplane_id']
             flights_to_add[i]['route_id'] = flights[i]['route_id']
-
 
         session.close()
 
@@ -175,6 +191,7 @@ class FlightService:
 
         flight_to_update = session.query(Flight).filter_by(id=flight['id']).first()
 
+
         if 'airplane_id' in flight:
             flight_to_update.airplane_id = flight['airplane_id']
 
@@ -189,7 +206,7 @@ class FlightService:
 
         if 'seat_price' in flight:
             flight_to_update.seat_price = "{:.2f}".format(flight['seat_price'])
-
+    
         session.commit()
         flight_to_update = FLIGHT_SCHEMA.dump(flight_to_update)
         session.close()
