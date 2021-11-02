@@ -1,4 +1,5 @@
-from flask import Flask, json, request, make_response, render_template
+from flask import Flask, json, request, make_response, render_template, jsonify
+from utopia.models.flights import AIRPORT_SCHEMA_MANY, ROUTE_SCHEMA_MANY
 from utopia import app
 from utopia.service.airport_service import AirportService
 import logging
@@ -13,8 +14,8 @@ AIRLINE_SERVICE = AirportService()
 
 @app.route('/')
 def index():
-    airports = AIRLINE_SERVICE.read_airports().json['airports']
-    response = make_response(render_template('airports.html', airports=airports))
+    routes = AIRLINE_SERVICE.read_routes().json['routes']
+    response = make_response(render_template('airports.html', routes=routes))
     return response
 
 
@@ -27,7 +28,7 @@ def readAirports():
 @app.route('/airlines/read/routes', methods=['GET'])
 def readRoutes():
 
-    return AIRLINE_SERVICE.read_routes()
+    return AIRLINE_SERVICE.read_routes(1) 
 
 
 @app.route('/airlines/find/airport/id=<iata_id>', methods=['GET'])
@@ -56,6 +57,12 @@ def addAirport():
 
     return AIRLINE_SERVICE.create_airport(request.json)
 
+
+@app.route('/airlines/add/airport/test', methods=['POST'])
+def addAirportTest():
+
+    AIRLINE_SERVICE.add_airports_test(request.json)
+    return ''
 
 @app.route('/airlines/add/route', methods=['POST'])
 def addRoute():

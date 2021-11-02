@@ -9,6 +9,7 @@ import logging, json, traceback
 
 logging.basicConfig(level=logging.INFO)
 
+NUM_ROUTES_PER_PAGE = 50
 
 class AirportService:
 
@@ -19,6 +20,14 @@ class AirportService:
 ############ GET ############
 
 
+    def add_airports_test(self, airport):
+        session = Session()
+        airport = Airport(iata_id=airport['iata_id'], city=airport['city'])
+        session.add(airport)
+        session.commit()
+
+
+
     def read_airports(self):
 
         logging.info("Reading all airports")
@@ -27,13 +36,13 @@ class AirportService:
         session = Session()
         airports = session.query(Airport).all()
 
-        airports = AIRPORT_SCHEMA_MANY.dump(airports)
 
-        airports = jsonify({'airports' : airports})
+        airports = jsonify({'airports' : AIRPORT_SCHEMA_MANY.dump(airports)})
 
         session.close()
 
         return airports
+
 
 
     def find_airport(self, iata_id):
@@ -48,12 +57,11 @@ class AirportService:
         session.close()
         return airport
 
-    def read_routes(self):
+    def read_routes(self, page):
 
             logging.info("Reading all routes")
 
             session = Session()
-
             routes = session.query(Route).all()
 
             routes =  jsonify({"routes": ROUTE_SCHEMA_MANY.dump(routes)})
@@ -87,9 +95,11 @@ class AirportService:
         elif(direction == 'outgoing'):
             routes = airport.outgoing
 
+        routes = jsonify({"routes": ROUTE_SCHEMA_MANY.dump(routes)})
+
         session.close()
 
-        return jsonify({"routes": ROUTE_SCHEMA_MANY.dump(routes)})
+        return routes
 
 
     
@@ -107,8 +117,8 @@ class AirportService:
         
         session.add(new_airport)
 
-        new_airport = AIRPORT_SCHEMA.dump(new_airport)
         session.commit()
+        new_airport = AIRPORT_SCHEMA.dump(new_airport)
 
         session.close()
 

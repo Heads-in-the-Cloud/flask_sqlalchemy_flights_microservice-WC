@@ -105,7 +105,9 @@ class AirplaneService:
         logging.info('adding airplane type')
 
         session = Session()
-        airplane_type = AirplaneType(id = None, max_capacity=airplane_type['max_capacity'])
+        airplane_type = AirplaneType(id = airplane_type['id'] if 'id' in airplane_type else None,
+        
+        max_capacity=airplane_type['max_capacity'])
         session.add(airplane_type)
 
         session.commit()

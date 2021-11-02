@@ -1,4 +1,5 @@
 from flask import Flask, app, jsonify
+from flask.helpers import make_response
 from flask_sqlalchemy import SQLAlchemy
 from utopia.models.flights import ROUTE_SCHEMA, FlightSchema, Route, Airplane, Flight, FLIGHT_SCHEMA, FLIGHT_SCHEMA_MANY
 
@@ -17,7 +18,7 @@ def generate_f_ids(length):
     session = Session()
     flights = session.query(Flight).all()
     session.close()
-    start_id = flights[len(flights)-1].id +1
+    start_id = flights[len(flights)-1].id +1 if len(flights) >0 else 1
     return [x for x in range(start_id, start_id+length)]
 
 def check_departure_time(departure_time, airplane_id):
@@ -113,15 +114,15 @@ class FlightService:
         except:
             raise ValueError()
         
-        # check_departure_time(departure_time, flight['airplane_id'])
+        if not check_departure_time(departure_time, flight['airplane_id']):
+            return make_response('Flights of the same airplane cannot take place within 48 hours', 400)
 
         flight_to_add = Flight(id=None if 'id' not in flight else flight['id'],
-        airplane_id=flight['airplane_id'], 
-        route_id = flight['route_id'],
-        departure_time=departure_time, 
-        reserved_seats=flight['reserved_seats'], 
-        seat_price="{:.2f}".format(flight['seat_price']))
-
+            airplane_id=flight['airplane_id'], 
+            route_id = flight['route_id'],
+            departure_time=departure_time, 
+            reserved_seats=flight['reserved_seats'], 
+            seat_price="{:.2f}".format(flight['seat_price']))
 
         
         session.add(flight_to_add)
@@ -160,7 +161,7 @@ class FlightService:
         session.commit()
         
 
-        flights_to_add = FlightSchema(many=True, exclude=['route']).dump(flights_to_add)
+        flights_to_add = FlightSchema(many=True, exclude=['route', 'airplane']).dump(flights_to_add)
 
 
         session.close()

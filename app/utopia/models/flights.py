@@ -92,7 +92,7 @@ class AirportSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         Base = Airport
         ordered = True
-        fields = ('iata_id', 'city')
+        fields = ('iata_id', 'city', 'as_origin', 'as_destination', 'flights')
 
 
 
@@ -100,10 +100,10 @@ class RouteSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         Base = Route
         ordered = True
-        fields = ('id', 'origin_id', 'destination_id', 'origin_airport', 'destination_airport')
+        fields = ('id', 'origin_id', 'destination_id', 'origin_airport', 'destination_airport', 'flights')
     origin_airport = fields.Nested(AirportSchema, only=['city'])
     destination_airport = fields.Nested(AirportSchema, only=['city'])
-
+    flights = fields.List(fields.Nested('FlightSchema'))
 
 class AirplaneTypeSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -116,7 +116,7 @@ class AirplaneTypeSchema(ma.SQLAlchemyAutoSchema):
 class AirplaneSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         Base = Airplane
-        fields = ('id', 'type_id')
+        fields = ('id', 'type_id', 'airplane_type')
         ordered = True
     airplane_type = fields.Nested(AirplaneTypeSchema, only=["max_capacity"])
 
@@ -124,10 +124,10 @@ class AirplaneSchema(ma.SQLAlchemyAutoSchema):
 class FlightSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         Base = Flight
-        fields = ("id", "route_id", "route", "airplane_id", "departure_time", "reserved_seats", "seat_price")
+        fields = ("id", "route_id", "route", "airplane_id", "departure_time", "reserved_seats", "seat_price", "airplane")
         ordered = True
     route = fields.Nested(RouteSchema, only = ['origin_id', 'destination_id'])
-
+    airplane = fields.Nested(AirplaneSchema, only=['airplane_type'])
 
 class FlightBookingsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
