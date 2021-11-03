@@ -8,8 +8,9 @@ from sqlalchemy.orm import backref, relation, relationship
 from utopia import app
 from functools import wraps
 import jwt
-from utopia.models.base import Base, Session
-
+from utopia.models.base import Base, db_session
+from flask_jwt_extended import get_jwt, create_access_token, set_access_cookies, get_jwt_identity
+from datetime import datetime, timedelta, timezone
 
 ma = Marshmallow(app)
 
@@ -57,32 +58,25 @@ class BookingGuest(Base):
     contact_phone = Column(String(45))
 
 
+def find_user(username):
+    user = db_session.query(User).filter_by(username=username).first()
 
-def token_required(f):
-    @wraps(f)
-    def decorator(*args, **kwargs):
-        token = None
+    user = UserSchema().dump(user)
+    return user
 
-        print(app.config['SECRET_KEY'])
-        print(request.headers)
-        if 'Authorization' in request.headers:
-        # if 'x-access-token' in request.headers:
-            # token = request.headers['x-access-token']
-            token = request.headers['Authorization'][7:]
-        if not token:
-            return jsonify({'message': 'a valid token is missing'})
+def refresh_token(response):
+    try:
+        exp_timestamp = get_jwt()["exp"]
+        now = datetime.now(timezone.utc)
+        target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
+        if target_timestamp > exp_timestamp:
+            access_token = create_access_token(identity=get_jwt_identity())
+            set_access_cookies(response, access_token)
+        return response
+    except (RuntimeError, KeyError):
 
-        try:
-            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
-            session = Session()
-
-            current_user = session.query(User).filter_by(username=data['username']).first()
-        except:
-            return jsonify({'message': 'token is invalid'})
-
-        return f(current_user, *args, **kwargs)
-
-    return decorator
+        # Case where there is not a valid JWT. Just return the original respone
+        return response
 
 
 ############################# SCHEMAS #############################

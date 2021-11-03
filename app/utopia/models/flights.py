@@ -6,15 +6,15 @@ from sqlalchemy.sql.sqltypes import Float
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, ForeignKeyConstraint
 from sqlalchemy.orm import backref, relation, relationship
 from utopia import app
-from utopia.models.base import Base, Session
+from utopia.models.base import Base, db_session
 
 
 ma = Marshmallow(app)
 
 
 def generate_f_id():
-    session = Session()
-    flight_ids = session.execute('SELECT id FROM flight')
+
+    flight_ids = db_session.execute('SELECT id FROM flight')
     i=1
     for id in flight_ids:
         

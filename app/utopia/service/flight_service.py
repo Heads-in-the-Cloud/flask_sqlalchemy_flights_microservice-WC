@@ -3,9 +3,10 @@ from flask.helpers import make_response
 from flask_sqlalchemy import SQLAlchemy
 from utopia.models.flights import ROUTE_SCHEMA, FlightSchema, Route, Airplane, Flight, FLIGHT_SCHEMA, FLIGHT_SCHEMA_MANY
 
-from utopia.models.base import Session
+from utopia.models.base import db_session
 
 import logging, json, traceback, datetime
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -15,16 +16,13 @@ SECONDS_IN_HOUR = 3600
 
 
 def generate_f_ids(length):
-    session = Session()
-    flights = session.query(Flight).all()
-    session.close()
+    flights = db_session.query(Flight).all()
     start_id = flights[len(flights)-1].id +1 if len(flights) >0 else 1
     return [x for x in range(start_id, start_id+length)]
 
 def check_departure_time(departure_time, airplane_id):
     flight_service = FlightService()
 
-    session = Session()
     flights = list(map(lambda x : datetime.datetime.strptime(x['departure_time'].replace('T', ' '), '%Y-%m-%d %H:%M:%S')
     , flight_service.read_flights_by_airplane(airplane_id).json['flights']))
     for existing_time in flights:
@@ -47,13 +45,12 @@ class FlightService:
 
         logging.info('finding flight with id %s ' %id)
 
-        session = Session()
-
-        flight = session.query(Flight).filter_by(id=id).first()
+    
+        flight = db_session.query(Flight).filter_by(id=id).first()
         flight = FLIGHT_SCHEMA.dump(flight)
         
-        session.close()
-
+        db_session.close()
+   
         return flight
 
 
@@ -61,14 +58,13 @@ class FlightService:
 
         logging.info('reading all flights')
 
-        session = Session()
-
-        flights = session.query(Flight).all()
+    
+        flights = db_session.query(Flight).all()
        
         flights = FLIGHT_SCHEMA_MANY.dump(flights)
 
-        session.close()
-
+        db_session.close()
+    
         return jsonify({'flights' : flights})
 
 
@@ -76,28 +72,26 @@ class FlightService:
 
         logging.info('finding flights by airplane id %s ' %id)
 
-        session = Session()
-
-        flights = session.query(Airplane).filter_by(id=id).first().flights
+    
+        flights = db_session.query(Airplane).filter_by(id=id).first().flights
 
         flights = FLIGHT_SCHEMA_MANY.dump(flights)
 
-        session.close()
-
+        db_session.close()
+    
         return jsonify({'flights' : flights})
 
     def read_flights_by_route(self, id):
 
         logging.info('finding flights by route id %s' %id)
 
-        session = Session()
-
-        flights = session.query(Route).filter_by(id=id).first().flights
+    
+        flights = db_session.query(Route).filter_by(id=id).first().flights
 
         flights = FLIGHT_SCHEMA_MANY.dump(flights)
 
-        session.close()
-
+        db_session.close()
+    
         return jsonify({'flights' : flights})
 
 
@@ -107,8 +101,7 @@ class FlightService:
         
         logging.info('adding flight')
 
-        session = Session()
-
+    
         try:
             departure_time = datetime.datetime.strptime(flight['departure_time'].replace('T', ' '), '%Y-%m-%d %H:%M:%S')
         except:
@@ -125,18 +118,19 @@ class FlightService:
             seat_price="{:.2f}".format(flight['seat_price']))
 
         
-        session.add(flight_to_add)
-        session.commit()
+        db_session.add(flight_to_add)
+        db_session.commit()
         flight_to_add = FLIGHT_SCHEMA.dump(flight_to_add)
-        session.close()
+
+        db_session.close()
+
         return flight_to_add
 
 
     def add_flights(self, flights):
 
         logging.info('adding flight')
-        session = Session()
-
+    
         flights_to_add = []
 
         for flight, flight_id in zip(flights, generate_f_ids(len(flights))):
@@ -155,17 +149,17 @@ class FlightService:
 
             flights_to_add.append(flight_to_add)
             
-        session.bulk_save_objects(flights_to_add)
+        db_session.bulk_save_objects(flights_to_add)
 
 
-        session.commit()
+        db_session.commit()
         
 
         flights_to_add = FlightSchema(many=True, exclude=['route', 'airplane']).dump(flights_to_add)
 
 
-        session.close()
-
+        db_session.close()
+   
         return jsonify({"flights" : flights_to_add})
 
 
@@ -176,9 +170,8 @@ class FlightService:
         
         logging.info('updating flight')
 
-        session = Session()
-
-        flight_to_update = session.query(Flight).filter_by(id=flight['id']).first()
+    
+        flight_to_update = db_session.query(Flight).filter_by(id=flight['id']).first()
 
 
         if 'airplane_id' in flight:
@@ -196,9 +189,11 @@ class FlightService:
         if 'seat_price' in flight:
             flight_to_update.seat_price = "{:.2f}".format(flight['seat_price'])
     
-        session.commit()
+        db_session.commit()
         flight_to_update = FLIGHT_SCHEMA.dump(flight_to_update)
-        session.close()
+
+        db_session.close()
+
         return flight_to_update
 
 
@@ -208,10 +203,10 @@ class FlightService:
 
         logging.info("deleting flight")
 
-        session = Session()
+    
+        db_session.query(Flight).filter_by(id=id).delete()
 
-        session.query(Flight).filter_by(id=id).delete()
-
-        session.commit()
-        session.close()
+        db_session.commit()
+        db_session.close()
         return ''
+

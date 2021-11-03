@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 
 from utopia.models.flights import AIRPORT_SCHEMA_MANY, ROUTE_SCHEMA, ROUTE_SCHEMA_MANY, Airport, Route, AIRPORT_SCHEMA
-from utopia.models.base import Session
+from utopia.models.base import db_session
 
 import logging, json, traceback
 
@@ -13,19 +13,9 @@ NUM_ROUTES_PER_PAGE = 50
 
 class AirportService:
 
-    def __init__(self):
-	    self = self
 
 
 ############ GET ############
-
-
-    def add_airports_test(self, airport):
-        session = Session()
-        airport = Airport(iata_id=airport['iata_id'], city=airport['city'])
-        session.add(airport)
-        session.commit()
-
 
 
     def read_airports(self):
@@ -33,13 +23,10 @@ class AirportService:
         logging.info("Reading all airports")
 
 
-        session = Session()
-        airports = session.query(Airport).all()
-
+        airports = Airport.query.all()
 
         airports = jsonify({'airports' : AIRPORT_SCHEMA_MANY.dump(airports)})
-
-        session.close()
+        db_session.close()
 
         return airports
 
@@ -48,25 +35,21 @@ class AirportService:
     def find_airport(self, iata_id):
 
         logging.info("Finding airport %s" %iata_id)
-
-        session = Session()
-        airport = session.query(Airport).filter_by(iata_id=iata_id).first()
-
+        airport = db_session.query(Airport).get(iata_id)
         airport = AIRPORT_SCHEMA.dump(airport)
+        db_session.close()
 
-        session.close()
         return airport
 
-    def read_routes(self, page):
+    def read_routes(self):
 
             logging.info("Reading all routes")
 
-            session = Session()
-            routes = session.query(Route).all()
+            routes = db_session.query(Route).all()
+            # routes = Route.query.paginate(per_page=NUM_ROUTES_PER_PAGE, page=page)
 
             routes =  jsonify({"routes": ROUTE_SCHEMA_MANY.dump(routes)})
-
-            session.close()
+            db_session.close()
 
             return routes
 
@@ -74,12 +57,11 @@ class AirportService:
 
         logging.info("Finding route %s" %id)
 
-        session = Session()
 
-        route = session.query(Route).filter_by(id=id).first()
+        route = db_session.query(Route).filter_by(id=id).first()
 
         route = ROUTE_SCHEMA.dump(route)
-        session.close()
+        db_session.close()
         return route
 
     def read_routes_by_airport(self, direction, iata_id):
@@ -87,9 +69,8 @@ class AirportService:
 
         routes = None
 
-        session = Session()
 
-        airport = session.query(Airport).filter_by(iata_id=iata_id).first()
+        airport = db_session.query(Airport).filter_by(iata_id=iata_id).first()
         if(direction == 'incoming'):
             routes = airport.incoming
         elif(direction == 'outgoing'):
@@ -97,7 +78,7 @@ class AirportService:
 
         routes = jsonify({"routes": ROUTE_SCHEMA_MANY.dump(routes)})
 
-        session.close()
+        db_session.close()
 
         return routes
 
@@ -113,14 +94,13 @@ class AirportService:
         logging.info(airport)
         
         new_airport = Airport(iata_id= airport['iata_id'], city = airport['city'])
-        session = Session()
         
-        session.add(new_airport)
+        db_session.add(new_airport)
 
-        session.commit()
+        db_session.commit()
         new_airport = AIRPORT_SCHEMA.dump(new_airport)
 
-        session.close()
+        db_session.close()
 
         return new_airport
 
@@ -131,12 +111,11 @@ class AirportService:
 
             new_route = Route(**route)
 
-            session = Session()
-            session.add(new_route)
-            session.commit()
+            db_session.add(new_route)
+            db_session.commit()
 
             new_route = ROUTE_SCHEMA.dump(new_route)
-            session.close()
+            db_session.close()
 
             return new_route
 
@@ -148,14 +127,13 @@ class AirportService:
         logging.info("Update airport")
         logging.info(airport)
 
-        session = Session()
-        airport_to_update = session.query(Airport).filter_by(iata_id=airport['iata_id']).first()
+        airport_to_update = db_session.query(Airport).filter_by(iata_id=airport['iata_id']).first()
         airport_to_update.city = airport['city']
         
-        session.commit()
+        db_session.commit()
 
         airport_to_update = AIRPORT_SCHEMA.dump(airport_to_update)
-        session.close()
+        db_session.close()
 
         return airport_to_update
 
@@ -163,20 +141,18 @@ class AirportService:
 
             logging.info("Update route")
 
-            session = Session()
-
-            route_to_update = session.query(Route).filter_by(id=route['id']).first()
+    
+            route_to_update = db_session.query(Route).filter_by(id=route['id']).first()
 
             if(route['origin_id'] != None):
                 route_to_update.origin_id = route['origin_id']
             if(route['destination_id'] != None):
                 route_to_update.destination_id = route['destination_id']
             
-            session.commit()
+            db_session.commit()
             route_to_update = ROUTE_SCHEMA.dump(route_to_update)
-            
-            session.close()
-
+            db_session.close()
+           
             return route_to_update
 
 
@@ -187,23 +163,23 @@ class AirportService:
     def delete_airport(self, iata_id):
         logging.info("Delete airport iata_id = %s" %iata_id)
 
-        session = Session()
 
-        session.query(Airport).filter_by(iata_id=iata_id).delete()
-        session.commit()
-        session.close()
+        db_session.query(Airport).filter_by(iata_id=iata_id).delete()
+        db_session.commit()
+        db_session.close()
 
-        return
+        return ''
 
     def delete_route(self, id):
 
         logging.info("Deleting route with id %s" %id)
 
-        session = Session()
-        session.query(Route).filter_by(id=id).delete()
-        
-        session.commit()
-        session.close()
+        db_session.query(Route).filter_by(id=id).delete()
+      
+        db_session.commit()
+
+        db_session.close()
+
         return ''
 
     

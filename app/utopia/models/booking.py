@@ -7,7 +7,7 @@ from sqlalchemy.sql.sqltypes import Boolean, Date
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, ForeignKeyConstraint
 from sqlalchemy.orm import backref, relation, relationship
 from utopia import app
-from utopia.models.base import Base, Session
+from utopia.models.base import Base
 
 
 from utopia.models.users import BookingAgentSchema, BookingGuestSchema, BookingUserSchema
